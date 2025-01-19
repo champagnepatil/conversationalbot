@@ -81,7 +81,7 @@ if prompt_input := st.chat_input("Your question here..."):
             
             # Add assistant response to session messages
             st.session_state.messages.append({"role": "assistant", "content": response})
-            st.write(response)
+           # st.write(response)
 
 # Display chat history
 for message in st.session_state.messages:
