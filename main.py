@@ -1,13 +1,11 @@
 import streamlit as st
 from streamlit_chat import message
-
-# Importing necessary components from LangChain
-from langchain_google_genai import ChatGoogleGenerativeAI  # Google Gemini model
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import ConversationChain, LLMChain
-from langchain.chains.conversation.memory import ConversationBufferWindowMemory
+from langchain.chains import LLMChain
+from langchain.memory import ConversationBufferWindowMemory
 
-# System message for the chatbot
+# Define the system message
 system_message = """
 You are Dr. Anasuya, a compassionate and highly skilled conversational companion. 
 Your role is to create a safe, supportive, and non-judgmental space where clients feel comfortable sharing their thoughts and feelings. 
@@ -41,54 +39,50 @@ to guide them toward clarity and solutions.
 - Be flexible and adapt to the client’s tone and communication style.
 """
 
-# Initialize PromptTemplate
+# Create a PromptTemplate
 prompt = PromptTemplate(
-    input_variables=["user_input"],  # Placeholder for user input
+    input_variables=["user_input"],
     template=f"{system_message}\n\nUser: {{user_input}}\nAssistant:"
 )
 
-# Initialize the language model (Google Gemini)
-llm = ChatGoogleGenerativeAI(model="gemini-pro")  # Ensure proper API key setup if required
+# Initialize the LLM
+llm = ChatGoogleGenerativeAI(model="gemini-pro")
+
+# Create an LLMChain
+llm_chain = LLMChain(llm=llm, prompt=prompt)
 
 # Initialize session state for memory
 if "buffer_memory" not in st.session_state:
     st.session_state.buffer_memory = ConversationBufferWindowMemory(k=3, return_messages=True)
 
 if "messages" not in st.session_state:
-    # Initialize chat history with an assistant's greeting
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello, I'm Dr. Anasuya. How can I assist you today?"}
     ]
 
-# Create LLMChain with the prompt
-llm_chain = LLMChain(llm=llm, prompt=prompt)
-
-# Create ConversationChain using memory and the LLMChain
-conversation = ConversationChain(memory=st.session_state.buffer_memory, llm_chain=llm_chain)
-
-# Create Streamlit UI
+# Streamlit UI
 st.title("🗣️ Conversational Chatbot by champagne.patil")
 st.subheader(
-    "Meet Dr. Anasuya, your thoughtful and compassionate conversational companion. Designed to help you explore your thoughts and feelings, "
-    "Dr. Anasuya uses reflective listening and gentle prompts to create a safe space for meaningful dialogue."
+    "Meet Dr. Anasuya, your thoughtful and compassionate conversational companion. "
+    "Designed to help you explore your thoughts and feelings, Dr. Anasuya uses reflective listening and gentle prompts "
+    "to create a safe space for meaningful dialogue."
 )
 
 # User input through chat interface
 if prompt_input := st.chat_input("Your question here..."):
-    # Add user input to message history
+    # Add user input to session messages
     st.session_state.messages.append({"role": "user", "content": prompt_input})
+
+    # Generate assistant response
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            # Generate response using the LLMChain
+            response = llm_chain.run({"user_input": prompt_input})
+            st.write(response)
+            # Add assistant response to session messages
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
 # Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
-
-# Generate assistant's response if the last message is from the user
-if st.session_state.messages[-1]["role"] == "user":
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            # Generate the assistant's response
-            response = conversation.predict(input=st.session_state.messages[-1]["content"])
-            st.write(response)
-            # Add the assistant's response to message history
-            st.session_state.messages.append({"role": "assistant", "content": response})
