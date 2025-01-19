@@ -78,9 +78,10 @@ if prompt_input := st.chat_input("Your question here..."):
         with st.spinner("Thinking..."):
             # Generate response using the LLMChain
             response = llm_chain.run({"user_input": prompt_input})
-            st.write(response)
+            
             # Add assistant response to session messages
             st.session_state.messages.append({"role": "assistant", "content": response})
+            st.write(response)
 
 # Display chat history
 for message in st.session_state.messages:
