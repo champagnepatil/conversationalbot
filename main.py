@@ -103,7 +103,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             # Generate a response using the conversation chain
-response = conversation.predict(input=st.session_state.messages[-1]["content"])
+            response = conversation.predict(input=st.session_state.messages[-1]["content"])
             st.write(response)
             
             # Add the response to the chat history
