@@ -35,7 +35,6 @@ to guide them toward clarity and solutions.
 
 ### Communication Style:
 - Always respond with warmth, patience, and empathy.
-- Use short, concise sentences (maximum 20 words).
 - Be flexible and adapt to the client’s tone and communication style.
 """
 
